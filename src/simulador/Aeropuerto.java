@@ -14,7 +14,7 @@ public class Aeropuerto extends Dibujable{
     @Override//Indicamos que vamos a redifinir en esta clase hija un metodo que
     //tiene la clase padre. Cuando se llame a estos metodos, las clases hijas
     //ejecutaran el metodo redefinido en estas y en las que no se hayan redefinido
-    //se ejecutara el de clase padre.
+    //se ejecutara el de la clase padre.
     public void draw() 
     {
        System.out.println("Dibujando Aeropuerto... ");
