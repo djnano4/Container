@@ -1,14 +1,81 @@
 package simulador;
 
 import java.util.ArrayList;
+import org.lwjgl.Sys;
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.*;
+ 
+import java.nio.ByteBuffer;
+ 
+import static org.lwjgl.glfw.Callbacks.*;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
 public class Aeropuerto extends Dibujable{
+    private GLFWErrorCallback errorCallback;
+    private GLFWKeyCallback   keyCallback;
+    private long window;
     
     private final ArrayList<Dibujable> objDibujables = new ArrayList<>();
+    
     //si ponemos final en una clase quiere decir q no puede haber clases q la hereden.
     public Aeropuerto()
     {
     //constructor, de momento vacío.
+    }
+    
+    public void run(){
+        try {
+            init();
+            loop();
+            glfwDestroyWindow(window);
+            keyCallback.release();
+        } finally {
+            glfwTerminate();
+            errorCallback.release();
+        }
+    }
+    private void init(){
+        glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
+        if ( glfwInit() != GL11.GL_TRUE )
+            throw new IllegalStateException("Unable to initialize GLFW");
+        glfwDefaultWindowHints(); 
+        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+ 
+        int WIDTH = 300;
+        int HEIGHT = 300;
+        
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Aeropuerto", NULL, NULL);
+        
+        if ( window == NULL )
+            throw new RuntimeException("Failed to create the GLFW window");
+        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
+            @Override
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+                    glfwSetWindowShouldClose(window, GL_TRUE); 
+            }
+        });
+        ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowPos(
+            window,
+            (GLFWvidmode.width(vidmode) - WIDTH) / 2,
+            (GLFWvidmode.height(vidmode) - HEIGHT) / 2
+        );
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
+        glfwShowWindow(window);
+    }
+    private void loop(){
+        GLContext.createFromCurrent();//Asociado a un hilo. EL unico q manejo.
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);//Fijamos el color.
+        while ( glfwWindowShouldClose(window) == GL_FALSE ) { //MIentras no cierres la pantalla.Limpias continuamente.
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+            glfwSwapBuffers(window);
+            glfwPollEvents();//Recoge si has exo algo en el raton o teclado.
+        }
     }
     
     @Override//Indicamos que vamos a redifinir en esta clase hija un metodo que
@@ -17,7 +84,8 @@ public class Aeropuerto extends Dibujable{
     //se ejecutara el de la clase padre.
     public void draw() 
     {
-       System.out.println("Dibujando Aeropuerto... ");
+       System.out.println("Dibujando Aeropuerto... "); 
+       run();
     }
     
     public void creador_pista (float pos_x, float pos_y, float pos_z)
@@ -84,4 +152,5 @@ public class Aeropuerto extends Dibujable{
         }
         }
     }
+    
 }

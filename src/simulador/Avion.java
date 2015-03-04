@@ -3,7 +3,7 @@ package simulador;
 public class Avion extends Dibujable{
     private float size;
     private float speed;
-    private float inclinacion_x, inclinacion_y, inclinacion_z;
+    private float inclinacion_x, inclinacion_y, inclinacion_z;    
     
     public Avion (float pos_x, float pos_y, float pos_z, float tipo_in, float ide_vuelo)
     {
