@@ -170,7 +170,7 @@ public class Simulador{
         //Creamos los objetos en las posiciones deseadas:
         creador_pista(3,2,2);
         creador_avion(0.5f,0.5f,0.5f,0001);
-        creador_avion(0.2f,0.2f,0.3f,0002);
+        creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
         
         while(true) {

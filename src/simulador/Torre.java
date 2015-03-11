@@ -26,10 +26,10 @@ public class Torre extends Dibujable{
 
         glColor3f(1.0f,1.0f,1.0f);
         glBegin(GL_QUADS);
-            glVertex3f(get_x() -0.2f,get_y() + 0.2f, 0f);                
-            glVertex3f(get_x() + 0.2f,get_y() + 0.2f, 0f);
-            glVertex3f(get_x() + 0.2f,get_y() -0.2f, 0f);
-            glVertex3f(get_x() -0.2f,get_y() -0.2f, 0f);
+            glVertex3f(get_x() -0.1f,get_y() + 0.1f, 0f);                
+            glVertex3f(get_x() + 0.1f,get_y() + 0.1f, 0f);
+            glVertex3f(get_x() + 0.1f,get_y() -0.1f, 0f);
+            glVertex3f(get_x() -0.1f,get_y() -0.1f, 0f);
         glEnd();
     }   
    
