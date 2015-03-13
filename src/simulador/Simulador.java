@@ -53,6 +53,8 @@ public class Simulador{
     private GLFWKeyCallback keyCallback;
     // The window handle
     private long window;
+    Aeropuerto aero = new Aeropuerto();
+    
     
     public void run() {
         try {
@@ -156,12 +158,10 @@ public class Simulador{
     }
     
     public void draw(){
-        Aeropuerto aero = new Aeropuerto();
-     //Dibujamos cada uno de los objetos creados:
+    //Dibujamos cada uno de los objetos creados:
         aero.drawBackground();
-        for (int i = 0; i < objDibujables.size(); i++)
-        {    
-           objDibujables.get(i).draw();
+        for (Dibujable objDibujable : objDibujables) {
+            objDibujable.draw();
         }
     }
     
