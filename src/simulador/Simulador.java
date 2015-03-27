@@ -1,48 +1,16 @@
 package simulador;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.Sys;
 import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
-import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
-import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
-import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
-import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
-import static org.lwjgl.glfw.GLFW.glfwInit;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
-import static org.lwjgl.glfw.GLFW.glfwTerminate;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWvidmode;
-import org.lwjgl.opengl.GL11;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_FALSE;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glVertex3f;
+import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.glfw.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.ArrayList;
@@ -53,47 +21,38 @@ public class Simulador{
     private GLFWKeyCallback keyCallback;
     // The window handle
     private long window;
-    Aeropuerto aero = new Aeropuerto();
-    
+    Aeropuerto aero = new Aeropuerto();//Para que el aeropuerto se pueda dibujar.
     
     public void run() {
         try {
             come_alive();
-            // Release window and window callbacks
             glfwDestroyWindow(window);
             keyCallback.release();
         } finally {
-            // Terminate GLFW and release the GLFWerrorfun
             glfwTerminate();
             errorCallback.release();
         }
     }
-    //while run, limpiar dibuja, makinaria init.
-    public void initGL() {
-        // Setup an error callback. The default implementation
-        // will print the error message in System.err.
-        glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
 
-        // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if (glfwInit() != GL11.GL_TRUE) {
+    public void initGL() {
+        glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
+        
+        if (glfwInit() != GL_TRUE) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
+        
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-        // Configure our window
-        glfwDefaultWindowHints(); // optional, the current window hints are already the default
-        glfwWindowHint(GLFW_VISIBLE, GL_FALSE); // the window will stay hidden after creation
-        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE); // the window will be resizable
-
-        int WIDTH = 600;
+        int WIDTH = 700;
         int HEIGHT = 600;
 
-        // Create the window
         window = glfwCreateWindow(WIDTH, HEIGHT, "Aeropuerto", NULL, NULL);
         if (window == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
-        // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
@@ -103,24 +62,68 @@ public class Simulador{
             }
         });
 
-        // Get the resolution of the primary monitor
         ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        // Center our window
+
         glfwSetWindowPos(
                 window,
                 (GLFWvidmode.width(vidmode) - WIDTH) / 2,
                 (GLFWvidmode.height(vidmode) - HEIGHT) / 2
         );
 
-        // Make the OpenGL context current
         glfwMakeContextCurrent(window);
-        // Enable v-sync
         glfwSwapInterval(1);
 
-        // Make the window visible
-        glfwShowWindow(window);
-    }
+        glfwShowWindow(window);    
+        //Limpiamos un poquillo.
+        GLContext.createFromCurrent();
+        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        
+        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, VertexShaderSrc);
+        glCompileShader(vertexShader);
+        int status = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
+        if (status != GL_TRUE) {
+            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
+        }
+        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, FragmentShaderSrc);
+        glCompileShader(fragmentShader);
+        status = glGetShaderi(fragmentShader, GL_COMPILE_STATUS);
+        if (status != GL_TRUE) {
+            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
+        }
+        //LOS JUNTAMOS:
+        int shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glBindFragDataLocation(shaderProgram, 0, "fragColor");
+        glLinkProgram(shaderProgram);
+        glUseProgram(shaderProgram);
+            
+        int posAttrib = glGetAttribLocation(shaderProgram, "aVertexPosition");//localiza
+        glEnableVertexAttribArray(posAttrib);
+        
+        int vertexColorAttribute = glGetAttribLocation(shaderProgram, "aVertexColor");//localiza
+        glEnableVertexAttribArray(vertexColorAttribute);
+    } 
+    
+    static final String VertexShaderSrc
+            = "        attribute vec3 aVertexPosition;\n"
+            + "        attribute vec3 aVertexColor;\n"
+            + "        varying vec4 vColor;\n"
+            + "        void main(void) {\n"
+            + "            gl_Position = vec4(aVertexPosition, 1.0);\n"
+            + "            vColor = vec4(aVertexColor.b, aVertexPosition.xy , 1.0);\n"
+            + "        }";
 
+    static final String FragmentShaderSrc
+            = "        varying vec4 vColor;\n"
+            + "        void main(void) {\n"
+            + "            gl_FragColor = vColor;\n"
+            + "        }"; 
+     
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {
         Pista pista = new Pista (pos_x,pos_y,pos_z,1);
@@ -173,12 +176,67 @@ public class Simulador{
         creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
         
+        /*
+        FloatBuffer vertices = BufferUtils.createFloatBuffer(3 * 3);
+        vertices.put(-0.6f).put(-0.4f).put(0f);
+        vertices.put(0.6f).put(-0.4f).put(0f);
+        vertices.put(0f).put(0.6f).put(0f);
+        vertices.flip();
+        int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);//Activa
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        
+        FloatBuffer colors = BufferUtils.createFloatBuffer(3 * 3);
+        colors.put(0f).put(1f).put(0f);
+        colors.put(0f).put(1f).put(1f);
+        colors.put(1f).put(0f).put(1f);
+        colors.flip();
+        int vbo_c = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
+        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);
+        
+        int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);//Activa
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        
+        int vbo_c = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
+        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);*/
+        
+        //*********************************************************************
+        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        /*int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, VertexShaderSrc);
+        glCompileShader(vertexShader);
+        int status = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
+        if (status != GL_TRUE) {
+            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
+        }
+        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, FragmentShaderSrc);
+        glCompileShader(fragmentShader);
+        status = glGetShaderi(fragmentShader, GL_COMPILE_STATUS);
+        if (status != GL_TRUE) {
+            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
+        }
+        //LOS JUNTAMOS:
+        int shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glBindFragDataLocation(shaderProgram, 0, "fragColor");
+        glLinkProgram(shaderProgram);
+        glUseProgram(shaderProgram);
+            
+        int posAttrib = glGetAttribLocation(shaderProgram, "aVertexPosition");//localiza
+        glEnableVertexAttribArray(posAttrib);*/
+        
+        
         while(true) {
-            //mientras no cierres la ventana.
+            //mientras no cierres la ventana.           
             while (glfwWindowShouldClose(window) == GL_FALSE) {
-                GLContext.createFromCurrent();
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra el lienzo, clear the framebuffer.
-                
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra el lienzo, clear the framebuffer.       
+                //dibujamos todo:
                 this.draw();
                 //Imprimimos aviones y posiciones:
                 System.out.println("En el Aeropuerto hay: " + pull_type(2).size());
@@ -187,14 +245,11 @@ public class Simulador{
                     System.out.println("Avion "+ i + " (" + 
                     pull_type(2).get(i).get_x() + "," +
                     pull_type(2).get(i).get_y() + "," +
-                    pull_type(2).get(i).get_z() + ")");   
-                }      
-                // Poll for window events. The key callback above will only be
-                // invoked during this call.
-                glfwPollEvents();
-                /* Swap buffers and poll Events */
-                glfwSwapBuffers(window); // swap the color buffers
+                    pull_type(2).get(i).get_z() + ")");                       
+                }                                    
+                glfwSwapBuffers(window);
                 
+                glfwPollEvents();               
             }
         }
     }

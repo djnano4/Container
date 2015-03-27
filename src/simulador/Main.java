@@ -3,10 +3,9 @@ package simulador;
 public class Main {
     public static void main(String[] args)
     {
-        Simulador simula = new Simulador();//Creo.
+        Simulador simula = new Simulador();
         
-        simula.initGL(); //Se suele hacer en estos pasos.
-        
+        simula.initGL();
         simula.run();     
     }    
 }

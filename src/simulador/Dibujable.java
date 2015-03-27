@@ -54,7 +54,23 @@ public abstract class Dibujable {
     public void set_num_vuelo(float v)
     {
         this.num_vuelo = v;
-    }  
+    }    
+   /* public float get_vbo_v()
+    {
+        return vbo_v;
+    }
+    public void set_vbo_v(int v)
+    {
+        this.vbo_v = v;
+    }
+    public float get_vbo_c()
+    {
+        return vbo_c;
+    }
+    public void set_vbo_c(int v)
+    {
+        this.vbo_c = v;
+    }*/
 }
 //variable global--> public static int esperanzavida;
 //sin static tienes q crear el objeto calculadora q te suma, quien te suma no es la clase es le objeto,

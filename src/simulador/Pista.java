@@ -1,12 +1,19 @@
 package simulador;
 
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glVertex3f;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.Sys;
+import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
+import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.glfw.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
+import org.lwjgl.opengl.GLContext;
+import static org.lwjgl.system.MemoryUtil.NULL;
+import java.util.ArrayList;
 
 public class Pista extends Dibujable{
     private float orientacion;
@@ -23,14 +30,6 @@ public class Pista extends Dibujable{
    public void draw() 
    {
         System.out.println("Dibujando pista " + get_length());
-        System.out.println("Posición pista " + get_x() + " " + get_y() + " " + get_z() );
-        glColor3f(1.0f,0.0f,1.0f);
-        glBegin(GL_QUADS);
-            glColor3f(0f, 1f, 0f);
-            glVertex3f(get_x() -0.1f, get_y() -0.1f, 0f);
-            glVertex3f(get_x() +0.1f, get_y() -0.1f, 0f);
-            glVertex3f(get_x() +0f, get_y() +0.2f, 0f);
-        glEnd();
-        
+        System.out.println("Posición pista " + get_x() + " " + get_y() + " " + get_z() );   
    } 
 }

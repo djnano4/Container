@@ -51,8 +51,6 @@ import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Aeropuerto extends Dibujable{
-    // The window handle
-    private long window;
     //si ponemos final en una clase quiere decir q no puede haber clases q la hereden.
     public Aeropuerto()
     {
@@ -62,16 +60,6 @@ public class Aeropuerto extends Dibujable{
     public void drawBackground() 
     {
         System.out.println("Dibujando Aeropuerto...");
-
-        
-        /* Render triangle */
-        glBegin(GL_QUADS);         
-            glColor3f(0.2f,0.2f,0.2f);           
-            glVertex3f(-0.8f, 0.8f, 0f);                
-            glVertex3f(0.8f, 0.8f, 0f);
-            glVertex3f(0.8f, -0.8f, 0f);
-            glVertex3f(-0.8f, -0.8f, 0f);           
-        glEnd();
     }
 
     @Override
