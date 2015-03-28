@@ -15,17 +15,17 @@ import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.ArrayList;
 
-public class Simulador{
+public class Simulador extends Dibujable {
     private final ArrayList<Dibujable> objDibujables = new ArrayList<>();
     private GLFWErrorCallback errorCallback;
     private GLFWKeyCallback keyCallback;
     // The window handle
     private long window;
     Aeropuerto aero = new Aeropuerto();//Para que el aeropuerto se pueda dibujar.
-    
+    private int shaderProgram;
     public void run() {
         try {
-            come_alive();
+            come_alive();//crea aviones y dibuja.
             glfwDestroyWindow(window);
             keyCallback.release();
         } finally {
@@ -74,7 +74,8 @@ public class Simulador{
         glfwSwapInterval(1);
 
         glfwShowWindow(window);    
-        //Limpiamos un poquillo.
+        
+        //Limpiamos.
         GLContext.createFromCurrent();
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         
@@ -95,18 +96,12 @@ public class Simulador{
             throw new RuntimeException(glGetShaderInfoLog(vertexShader));
         }
         //LOS JUNTAMOS:
-        int shaderProgram = glCreateProgram();
+        shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
         glBindFragDataLocation(shaderProgram, 0, "fragColor");
         glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);
-            
-        int posAttrib = glGetAttribLocation(shaderProgram, "aVertexPosition");//localiza
-        glEnableVertexAttribArray(posAttrib);
-        
-        int vertexColorAttribute = glGetAttribLocation(shaderProgram, "aVertexColor");//localiza
-        glEnableVertexAttribArray(vertexColorAttribute);
+        glUseProgram(shaderProgram);     
     } 
     
     static final String VertexShaderSrc
@@ -132,10 +127,10 @@ public class Simulador{
     }
      
     public void creador_avion(float pos_x, float pos_y, float pos_z, float ide_vuelo) {
-        Avion avion = new Avion(pos_x,pos_y,pos_z,2,ide_vuelo);
+        Avion avion = new Avion(pos_x,pos_y,pos_z,2,ide_vuelo, shaderProgram);
         System.out.println("Avión añadido");
         objDibujables.add(avion);
-    }    
+    }
     
     public void creador_torre(float pos_x, float pos_y, float pos_z){
         Torre torre = new Torre (pos_x,pos_y,pos_z,3);
@@ -160,6 +155,7 @@ public class Simulador{
         return outDibujables;    
     }
     
+    @Override
     public void draw(){
     //Dibujamos cada uno de los objetos creados:
         aero.drawBackground();
@@ -175,63 +171,7 @@ public class Simulador{
         creador_avion(0.5f,0.5f,0.5f,0001);
         creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
-        
-        /*
-        FloatBuffer vertices = BufferUtils.createFloatBuffer(3 * 3);
-        vertices.put(-0.6f).put(-0.4f).put(0f);
-        vertices.put(0.6f).put(-0.4f).put(0f);
-        vertices.put(0f).put(0.6f).put(0f);
-        vertices.flip();
-        int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);//Activa
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        
-        FloatBuffer colors = BufferUtils.createFloatBuffer(3 * 3);
-        colors.put(0f).put(1f).put(0f);
-        colors.put(0f).put(1f).put(1f);
-        colors.put(1f).put(0f).put(1f);
-        colors.flip();
-        int vbo_c = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
-        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);
-        
-        int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);//Activa
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        
-        int vbo_c = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
-        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);*/
-        
-        //*********************************************************************
-        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-        /*int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, VertexShaderSrc);
-        glCompileShader(vertexShader);
-        int status = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
-        if (status != GL_TRUE) {
-            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
-        }
-        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, FragmentShaderSrc);
-        glCompileShader(fragmentShader);
-        status = glGetShaderi(fragmentShader, GL_COMPILE_STATUS);
-        if (status != GL_TRUE) {
-            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
-        }
-        //LOS JUNTAMOS:
-        int shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glBindFragDataLocation(shaderProgram, 0, "fragColor");
-        glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);
-            
-        int posAttrib = glGetAttribLocation(shaderProgram, "aVertexPosition");//localiza
-        glEnableVertexAttribArray(posAttrib);*/
-        
-        
+
         while(true) {
             //mientras no cierres la ventana.           
             while (glfwWindowShouldClose(window) == GL_FALSE) {
@@ -245,8 +185,8 @@ public class Simulador{
                     System.out.println("Avion "+ i + " (" + 
                     pull_type(2).get(i).get_x() + "," +
                     pull_type(2).get(i).get_y() + "," +
-                    pull_type(2).get(i).get_z() + ")");                       
-                }                                    
+                    pull_type(2).get(i).get_z() + ")");   
+                }                                  
                 glfwSwapBuffers(window);
                 
                 glfwPollEvents();               

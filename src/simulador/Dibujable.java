@@ -5,6 +5,8 @@ public abstract class Dibujable {
     private float length;
     private float tipo;
     private float num_vuelo;
+    private int vbo_v,vbo_c;
+    private int posAttrib, vertexColorAttribute;
     public abstract void draw(); 
    //getters and setters    
    public float get_x()
@@ -55,7 +57,7 @@ public abstract class Dibujable {
     {
         this.num_vuelo = v;
     }    
-   /* public float get_vbo_v()
+    public float get_vbo_v()
     {
         return vbo_v;
     }
@@ -70,7 +72,23 @@ public abstract class Dibujable {
     public void set_vbo_c(int v)
     {
         this.vbo_c = v;
-    }*/
+    }
+    public int get_posAttrib()
+    {
+        return posAttrib;
+    }
+    public void set_posAttrib(int v)
+    {
+        this.posAttrib = v;
+    }
+    public int get_vertex()
+    {
+        return vertexColorAttribute;
+    }
+    public void set_vertex(int v)
+    {
+        this.vertexColorAttribute = v;
+    } 
 }
 //variable global--> public static int esperanzavida;
 //sin static tienes q crear el objeto calculadora q te suma, quien te suma no es la clase es le objeto,
