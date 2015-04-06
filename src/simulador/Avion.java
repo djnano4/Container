@@ -27,7 +27,7 @@ public class Avion extends Dibujable{
         set_z(pos_z);
         set_tipo(tipo_in);
         set_num_vuelo(ide_vuelo);
-
+         
         FloatBuffer vertices = BufferUtils.createFloatBuffer(3 * 3);
         vertices.put(-0.6f).put(-0.4f).put(0f);
         vertices.put(0.6f).put(-0.4f).put(0f);
@@ -91,9 +91,18 @@ public class Avion extends Dibujable{
         glBindBuffer(GL_ARRAY_BUFFER,(int)get_vbo_c());
         glVertexAttribPointer((int)get_vertex(), 3, GL_FLOAT, false, 0, 0);
         
+        //count = get_x(); //COMPROBAR Q HAY DOS AVIONES POR EL MOMENTO FLAG!!!
         count += 0.01f;
-        float posX = (float)Math.sin(count);
-        glUniform1f(get_uniform(), posX);
-        glDrawArrays(GL_TRIANGLES, 0, 3);//de 3 vertices empezando desde el 0.
+        
+        if (get_num_vuelo() == 0001) {
+            float posX = (float)Math.sin(count);
+            glUniform1f(get_uniform(), posX);
+            glDrawArrays(GL_TRIANGLES, 0, 3);//de 3 vertices empezando desde el 0.
+        }
+        
+        if (get_num_vuelo() == 0002) {
+            glUniform1f(get_uniform(), (float)Math.cos(count));
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
     }
 }

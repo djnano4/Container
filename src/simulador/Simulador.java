@@ -77,7 +77,7 @@ public class Simulador extends Dibujable {
         
         //Limpiamos.
         GLContext.createFromCurrent();
-        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
         
         //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -124,7 +124,7 @@ public class Simulador extends Dibujable {
      
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {
-        Pista pista = new Pista (pos_x,pos_y,pos_z,1);
+        Pista pista = new Pista (pos_x,pos_y,pos_z,1, shaderProgram);
         System.out.println("Pista añadida"); 
         objDibujables.add(pista);
     }
@@ -188,7 +188,7 @@ public class Simulador extends Dibujable {
                     System.out.println("Avion "+ i + " (" + 
                     pull_type(2).get(i).get_x() + "," +
                     pull_type(2).get(i).get_y() + "," +
-                    pull_type(2).get(i).get_z() + ")");   
+                    pull_type(2).get(i).get_z() + ")");  
                 }                                  
                 glfwSwapBuffers(window);
                 
