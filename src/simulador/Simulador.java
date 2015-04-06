@@ -25,7 +25,7 @@ public class Simulador extends Dibujable {
     private int shaderProgram;
     public void run() {
         try {
-            come_alive();//crea aviones y dibuja.
+            come_alive();//crear y dibujar.
             glfwDestroyWindow(window);
             keyCallback.release();
         } finally {
@@ -104,20 +104,23 @@ public class Simulador extends Dibujable {
         glUseProgram(shaderProgram);     
     } 
     
-    static final String VertexShaderSrc
+   static final String VertexShaderSrc
             = "        attribute vec3 aVertexPosition;\n"
             + "        attribute vec3 aVertexColor;\n"
             + "        varying vec4 vColor;\n"
+            + "\n"  
+            + "        uniform float posX;\n"
+            + "\n"
             + "        void main(void) {\n"
-            + "            gl_Position = vec4(aVertexPosition, 1.0);\n"
-            + "            vColor = vec4(aVertexColor.b, aVertexPosition.xy , 1.0);\n"
+            + "            gl_Position = vec4(aVertexPosition.x + posX, aVertexPosition.yz, 1.0);\n"
+            + "            vColor = vec4(aVertexColor, 1.0);\n"
             + "        }";
 
     static final String FragmentShaderSrc
             = "        varying vec4 vColor;\n"
             + "        void main(void) {\n"
             + "            gl_FragColor = vColor;\n"
-            + "        }"; 
+            + "        }";
      
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {
@@ -171,11 +174,11 @@ public class Simulador extends Dibujable {
         creador_avion(0.5f,0.5f,0.5f,0001);
         creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
-
+        
         while(true) {
             //mientras no cierres la ventana.           
             while (glfwWindowShouldClose(window) == GL_FALSE) {
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra el lienzo, clear the framebuffer.       
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra el lienzo, clear the framebuffer.      
                 //dibujamos todo:
                 this.draw();
                 //Imprimimos aviones y posiciones:

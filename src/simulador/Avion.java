@@ -19,7 +19,7 @@ public class Avion extends Dibujable{
     private float size;
     private float speed;
     private float inclinacion_x, inclinacion_y, inclinacion_z;   
-
+    private float count;
     public Avion (float pos_x, float pos_y, float pos_z, float tipo_in, float ide_vuelo, int shader)
     {
         set_x(pos_x);
@@ -47,6 +47,9 @@ public class Avion extends Dibujable{
         int vertexColorAttribute = glGetAttribLocation(shader, "aVertexColor");//localiza
         glEnableVertexAttribArray(vertexColorAttribute);
         set_vertex(vertexColorAttribute);
+
+        int uniformPosX = glGetUniformLocation(shader, "posX");//localiza
+        set_uniform(uniformPosX);
         
         int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
         set_vbo_v(vbo_v);
@@ -88,6 +91,9 @@ public class Avion extends Dibujable{
         glBindBuffer(GL_ARRAY_BUFFER,(int)get_vbo_c());
         glVertexAttribPointer((int)get_vertex(), 3, GL_FLOAT, false, 0, 0);
         
+        count += 0.01f;
+        float posX = (float)Math.sin(count);
+        glUniform1f(get_uniform(), posX);
         glDrawArrays(GL_TRIANGLES, 0, 3);//de 3 vertices empezando desde el 0.
     }
 }

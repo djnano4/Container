@@ -7,6 +7,7 @@ public abstract class Dibujable {
     private float num_vuelo;
     private int vbo_v,vbo_c;
     private int posAttrib, vertexColorAttribute;
+    private int uniformPosX;
     public abstract void draw(); 
    //getters and setters    
    public float get_x()
@@ -88,6 +89,14 @@ public abstract class Dibujable {
     public void set_vertex(int v)
     {
         this.vertexColorAttribute = v;
+    } 
+    public int get_uniform()
+    {
+        return uniformPosX;
+    }
+    public void set_uniform(int v)
+    {
+        this.uniformPosX = v;
     } 
 }
 //variable global--> public static int esperanzavida;
