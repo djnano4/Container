@@ -14,6 +14,8 @@ import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.ArrayList;
+import Utils.Matrix4f;
+
 
 public class Pista extends Dibujable{
     private float orientacion;
@@ -47,8 +49,8 @@ public class Pista extends Dibujable{
         glEnableVertexAttribArray(vertexColorAttribute);
         set_vertex(vertexColorAttribute);
 
-        int uniformPosX = glGetUniformLocation(shader, "posX");//localiza
-        set_uniform(uniformPosX);
+        int uniModel = glGetUniformLocation(shader, "model");
+        set_model(uniModel);
         
         int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
         set_vbo_v(vbo_v);
@@ -72,8 +74,9 @@ public class Pista extends Dibujable{
         
         glBindBuffer(GL_ARRAY_BUFFER,(int)get_vbo_c());
         glVertexAttribPointer((int)get_vertex(), 3, GL_FLOAT, false, 0, 0);
-
-        glUniform1f(get_uniform(), 0);
+  
+        Matrix4f model = Matrix4f.translate(0.0f, 0.0f, 0);
+        glUniformMatrix4(get_model(), false, model.getBuffer());
         glDrawArrays(GL_QUADS, 0, 4);//de 4 vertices empezando desde el 0.
    } 
 }

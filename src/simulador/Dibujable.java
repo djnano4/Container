@@ -8,6 +8,7 @@ public abstract class Dibujable {
     private int vbo_v,vbo_c;
     private int posAttrib, vertexColorAttribute;
     private int uniformPosX;
+    private int uniModel;
     public abstract void draw(); 
    //getters and setters    
    public float get_x()
@@ -97,6 +98,14 @@ public abstract class Dibujable {
     public void set_uniform(int v)
     {
         this.uniformPosX = v;
+    } 
+    public int get_model()
+    {
+        return uniModel;
+    }
+    public void set_model(int v)
+    {
+        this.uniModel = v;
     } 
 }
 //variable global--> public static int esperanzavida;

@@ -104,23 +104,30 @@ public class Simulador extends Dibujable {
         glUseProgram(shaderProgram);     
     } 
     
-   static final String VertexShaderSrc
-            = "        attribute vec3 aVertexPosition;\n"
-            + "        attribute vec3 aVertexColor;\n"
-            + "        varying vec4 vColor;\n"
-            + "\n"  
-            + "        uniform float posX;\n"
-            + "\n"
-            + "        void main(void) {\n"
-            + "            gl_Position = vec4(aVertexPosition.x + posX, aVertexPosition.yz, 1.0);\n"
-            + "            vColor = vec4(aVertexColor, 1.0);\n"
-            + "        }";
-
-    static final String FragmentShaderSrc
-            = "        varying vec4 vColor;\n"
-            + "        void main(void) {\n"
-            + "            gl_FragColor = vColor;\n"
-            + "        }";
+   static final String VertexShaderSrc = 
+                        "#version 130\n" +
+                        "\n" +
+                        "   in vec3 aVertexPosition;\n" +
+                        "   in vec3 aVertexColor;\n" +
+                        "\n" +
+                        "   out vec3 vColor;\n" +
+                        "\n" +
+                        "   uniform mat4 model;\n" +
+                        "\n" +
+                        "   void main() {\n" +
+                        "       vColor = aVertexColor;\n" +
+                        "       mat4 mvp = model;\n" +
+                        "       gl_Position = mvp * vec4(aVertexPosition, 1.0);\n" +
+                        "   }";
+    
+    static final String FragmentShaderSrc = 
+                        "#version 130\n" +
+                        "\n" +
+                        "   in vec3 vColor;\n" +
+                        "\n" +
+                        "   void main() {\n" +
+                        "        gl_FragColor = vec4(vColor, 1.0);\n" +
+                        "   }";
      
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {

@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.ArrayList;
+import Utils.Matrix4f;
 
 public class Avion extends Dibujable{
     private float size;
@@ -48,8 +49,9 @@ public class Avion extends Dibujable{
         glEnableVertexAttribArray(vertexColorAttribute);
         set_vertex(vertexColorAttribute);
 
-        int uniformPosX = glGetUniformLocation(shader, "posX");//localiza
-        set_uniform(uniformPosX);
+        
+        int uniModel = glGetUniformLocation(shader, "model");
+        set_model(uniModel);
         
         int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
         set_vbo_v(vbo_v);
@@ -95,13 +97,18 @@ public class Avion extends Dibujable{
         count += 0.01f;
         
         if (get_num_vuelo() == 0001) {
-            float posX = (float)Math.sin(count);
-            glUniform1f(get_uniform(), posX);
+            float posX = (float)Math.sin(count)/2;
+            float posY = (float)Math.cos(count)/2;
+            Matrix4f model = Matrix4f.translate(posX, posY, 0);
+            glUniformMatrix4(get_model(), false, model.getBuffer());
             glDrawArrays(GL_TRIANGLES, 0, 3);//de 3 vertices empezando desde el 0.
         }
         
         if (get_num_vuelo() == 0002) {
-            glUniform1f(get_uniform(), (float)Math.cos(count));
+            float posX = (float)Math.sin(count);
+            float posY = (float)Math.cos(count);
+            Matrix4f model = Matrix4f.translate(posX, posY, 0);
+            glUniformMatrix4(get_model(), false, model.getBuffer());
             glDrawArrays(GL_TRIANGLES, 0, 3);
         }
     }
