@@ -9,6 +9,8 @@ public abstract class Dibujable {
     private int posAttrib, vertexColorAttribute;
     private int uniformPosX;
     private int uniModel;
+    private int uniProjection;
+    
     public abstract void draw(); 
    //getters and setters    
    public float get_x()
@@ -107,6 +109,14 @@ public abstract class Dibujable {
     {
         this.uniModel = v;
     } 
+    public int get_projection()
+    {
+        return uniProjection;
+    }
+    public void set_projection(int v)
+    {
+        this.uniProjection = v;
+    }    
 }
 //variable global--> public static int esperanzavida;
 //sin static tienes q crear el objeto calculadora q te suma, quien te suma no es la clase es le objeto,

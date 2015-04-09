@@ -68,15 +68,6 @@ public class Pista extends Dibujable{
    {
         System.out.println("Dibujando pista " + get_length());
         System.out.println("Posición pista " + get_x() + " " + get_y() + " " + get_z());
-        
-        glBindBuffer(GL_ARRAY_BUFFER, (int)get_vbo_v());//activamelo 
-        glVertexAttribPointer((int)get_posAttrib(), 3, GL_FLOAT, false, 0, 0);//conectalo con el buffer activo!!!!!!!
-        
-        glBindBuffer(GL_ARRAY_BUFFER,(int)get_vbo_c());
-        glVertexAttribPointer((int)get_vertex(), 3, GL_FLOAT, false, 0, 0);
-  
-        Matrix4f model = Matrix4f.translate(0.0f, 0.0f, 0);
-        glUniformMatrix4(get_model(), false, model.getBuffer());
-        glDrawArrays(GL_QUADS, 0, 4);//de 4 vertices empezando desde el 0.
+       
    } 
 }

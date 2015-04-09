@@ -1,68 +1,128 @@
 package simulador;
 
-import java.nio.ByteBuffer;
+import Utils.Drawable;
+import Utils.*;
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.Sys;
-import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
-import static org.lwjgl.glfw.GLFW.*;
-import org.lwjgl.glfw.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import org.lwjgl.opengl.GLContext;
-import static org.lwjgl.system.MemoryUtil.NULL;
-import java.util.ArrayList;
-import Utils.Matrix4f;
 
-public class Avion extends Dibujable{
+
+public class Avion extends Dibujable implements Drawable{
     private float size;
     private float speed;
     private float inclinacion_x, inclinacion_y, inclinacion_z;   
     private float count;
+    private float angle;
+    private static final float angularVelocity = 30.f;
+    private ShaderProgram shaderProgram;
+    private int uniModel;
+    private OpenGLHelper openGLHelper;
+    float[] vertices = new float[]{
+            1.0f, 1.0f, 1.0f, // Top Right Of The Quad (Front)
+            -1.0f, 1.0f, 1.0f, // Top Left Of The Quad (Front)
+            -1.0f, -1.0f, 1.0f, // Bottom Left Of The Quad (Front)
+            1.0f, -1.0f, 1.0f, // Bottom Right Of The Quad (Front)
+
+            1.0f, 1.0f, -1.0f, // Top Right Of The Quad (Top)
+            -1.0f, 1.0f, -1.0f, // Top Left Of The Quad (Top)
+            -1.0f, 1.0f, 1.0f, // Bottom Left Of The Quad (Top)
+            1.0f, 1.0f, 1.0f, // Bottom Right Of The Quad (Top)
+
+            -1.0f, 1.0f, 1.0f, // Top Right Of The Quad (Left)
+            -1.0f, 1.0f, -1.0f, // Top Left Of The Quad (Left)
+            -1.0f, -1.0f, -1.0f, // Bottom Left Of The Quad (Left)
+            -1.0f, -1.0f, 1.0f, // Bottom Right Of The Quad (Left)
+
+            1.0f, -1.0f, -1.0f, // Bottom Left Of The Quad (Back)
+            -1.0f, -1.0f, -1.0f, // Bottom Right Of The Quad (Back)
+            -1.0f, 1.0f, -1.0f, // Top Right Of The Quad (Back)
+            1.0f, 1.0f, -1.0f, // Top Left Of The Quad (Back)
+
+            1.0f, -1.0f, 1.0f, // Top Right Of The Quad (Bottom)
+            -1.0f, -1.0f, 1.0f, // Top Left Of The Quad (Bottom)
+            -1.0f, -1.0f, -1.0f, // Bottom Left Of The Quad (Bottom)
+            1.0f, -1.0f, -1.0f, // Bottom Right Of The Quad (Bottom)
+
+            1.0f, 1.0f, -1.0f, // Top Right Of The Quad (Right)
+            1.0f, 1.0f, 1.0f, // Top Left Of The Quad (Right)
+            1.0f, -1.0f, 1.0f, // Bottom Left Of The Quad (Right)
+            1.0f, -1.0f, -1.0f // Bottom Right Of The Quad (Right)
+        };
+
+        float[] colors = new float[]{
+            0.9f, 0.9f, 0.9f, // Top Right Of The Quad (Front)
+            0.9f, 0.9f, 0.9f, // Top Left Of The Quad (Front)
+            0.9f, 0.9f, 0.9f, // Bottom Left Of The Quad (Front)
+            0.9f, 0.9f, 0.9f, // Bottom Right Of The Quad (Front)
+
+            1.0f, 1.0f, 1.0f, // Top Right Of The Quad (Top)
+            1.0f, 1.0f, 1.0f, // Top Left Of The Quad (Top)
+            1.0f, 1.0f, 1.0f, // Bottom Left Of The Quad (Top)
+            1.0f, 1.0f, 1.0f, // Bottom Right Of The Quad (Top)
+
+            0.7f, 0.7f, 0.7f, // Top Right Of The Quad (Left)
+            0.7f, 0.7f, 0.7f, // Top Left Of The Quad (Left)
+            0.7f, 0.7f, 0.7f, // Bottom Left Of The Quad (Left)
+            0.7f, 0.7f, 0.7f, // Bottom Right Of The Quad (Left)
+
+            0.7f, 0.7f, 0.7f, // Bottom Left Of The Quad (Back)
+            0.7f, 0.7f, 0.7f, // Bottom Right Of The Quad (Back)
+            0.7f, 0.7f, 0.7f, // Top Right Of The Quad (Back)
+            0.7f, 0.7f, 0.7f, // Top Left Of The Quad (Back)
+
+            0.5f, 0.5f, 0.5f, // Top Right Of The Quad (Bottom)
+            0.5f, 0.5f, 0.5f, // Top Left Of The Quad (Bottom)
+            0.5f, 0.5f, 0.5f, // Bottom Left Of The Quad (Bottom)
+            0.5f, 0.5f, 0.5f, // Bottom Right Of The Quad (Bottom)
+
+            0.9f, 0.9f, 0.9f, // Top Right Of The Quad (Right)
+            0.9f, 0.9f, 0.9f, // Top Left Of The Quad (Right)
+            0.9f, 0.9f, 0.9f, // Bottom Left Of The Quad (Right)
+            0.9f, 0.9f, 0.9f  // Bottom Right Of The Quad (Right)
+        };
+
+        float[] textCoords = new float[]{
+            1.0f, 1.0f, // Top Right Of The Quad (Front)
+            0.0f, 1.0f, // Top Left Of The Quad (Front)
+            0.0f, 0.0f, // Bottom Left Of The Quad (Front)
+            1.0f, 0.0f, // Bottom Right Of The Quad (Front)
+
+            1.0f, 1.0f, // Top Right Of The Quad (Top)
+            0.0f, 1.0f, // Top Left Of The Quad (Top)
+            0.0f, 0.0f, // Bottom Left Of The Quad (Top)
+            1.0f, 0.0f, // Bottom Right Of The Quad (Top)
+
+            1.0f, 1.0f, // Top Right Of The Quad (Left)
+            0.0f, 1.0f, // Top Left Of The Quad (Left)
+            0.0f, 0.0f, // Bottom Left Of The Quad (Left)
+            1.0f, 0.0f, // Bottom Right Of The Quad (Left)
+
+            1.0f, 1.0f, // Bottom Left Of The Quad (Back)
+            0.0f, 1.0f, // Bottom Right Of The Quad (Back)
+            0.0f, 0.0f, // Top Right Of The Quad (Back)
+            1.0f, 0.0f, // Top Left Of The Quad (Back)
+
+            1.0f, 1.0f, // Top Right Of The Quad (Bottom)
+            0.0f, 1.0f, // Top Left Of The Quad (Bottom)
+            0.0f, 0.0f, // Bottom Left Of The Quad (Bottom)
+            1.0f, 0.0f, // Bottom Right Of The Quad (Bottom)
+
+            1.0f, 1.0f, // Top Right Of The Quad (Right)
+            0.0f, 1.0f, // Top Left Of The Quad (Right)
+            0.0f, 0.0f, // Bottom Left Of The Quad (Right)
+            1.0f, 0.0f, // Bottom Right Of The Quad (Right)
+        };
+    
+    
     public Avion (float pos_x, float pos_y, float pos_z, float tipo_in, float ide_vuelo, int shader)
     {
         set_x(pos_x);
         set_y(pos_y);
         set_z(pos_z);
         set_tipo(tipo_in);
-        set_num_vuelo(ide_vuelo);
-         
-        FloatBuffer vertices = BufferUtils.createFloatBuffer(3 * 3);
-        vertices.put(-0.6f).put(-0.4f).put(0f);
-        vertices.put(0.6f).put(-0.4f).put(0f);
-        vertices.put(0f).put(0.6f).put(0f);
-        vertices.flip();        
-        
-        FloatBuffer colors = BufferUtils.createFloatBuffer(3 * 3);
-        colors.put(0f).put(1f).put(0f);
-        colors.put(0f).put(1f).put(1f);
-        colors.put(1f).put(0f).put(1f);
-        colors.flip();
-        //El shader q le metemos al avion es el q creamos en initgl del simulador. Aqui sabemos el shader xq se lo hemos pasado como parametro.
-        int posAttrib = glGetAttribLocation(shader, "aVertexPosition");//localiza la puerta entre shader y buffer.
-        glEnableVertexAttribArray(posAttrib);//Abre la puerta.
-        set_posAttrib(posAttrib);
-        
-        int vertexColorAttribute = glGetAttribLocation(shader, "aVertexColor");//localiza
-        glEnableVertexAttribArray(vertexColorAttribute);
-        set_vertex(vertexColorAttribute);
-
-        
-        int uniModel = glGetUniformLocation(shader, "model");
-        set_model(uniModel);
-        
-        int vbo_v = glGenBuffers();//hazme un sitio en vertex opengl.TUnel.
-        set_vbo_v(vbo_v);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);//Activa
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);//Meto datos.
-        
-        int vbo_c = glGenBuffers();//Creas.
-        set_vbo_c(vbo_c);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);//Activo.
-        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);//Meto datos.
-
+        set_num_vuelo(ide_vuelo);        
     }
    
     public void volar()
@@ -79,37 +139,73 @@ public class Avion extends Dibujable{
         z_new++;
         set_z(z_new);
         
-        System.out.println("Aumentando posición en 1..." + get_x() + " " + get_y() + " " + get_z());
+        System.out.println("AumentprepareBuffersando posición en 1..." + get_x() + " " + get_y() + " " + get_z());
     }
     
-     @Override 
+    public void prepareBuffers(OpenGLHelper openGLHelper_param) {
+        //Necesitamos pasarle como parametro el openglGLHelper. La declaración 
+        //se realizó arriba y aquí se asigna un valor.
+        openGLHelper = openGLHelper_param;
+        shaderProgram = openGLHelper.getShaderProgram();
+        // --------------------- VERTICES POSITIONS --------------------------//
+        FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
+        verticesBuffer.put(vertices).flip();
+
+        int vbo_v = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
+
+        int posAttrib = shaderProgram.getAttributeLocation("aVertexPosition");
+        glEnableVertexAttribArray(posAttrib);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_v);
+
+        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, false, 0, 0);
+
+        // ----------------------- COLORS DATA -------------------------------//
+        
+        FloatBuffer colorsBuffer = BufferUtils.createFloatBuffer(colors.length);
+        colorsBuffer.put(colors).flip();
+
+        int vbo_c = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
+        glBufferData(GL_ARRAY_BUFFER, colorsBuffer, GL_STATIC_DRAW);
+        
+        int vertexColorAttribute = shaderProgram.getAttributeLocation("aVertexColor");
+        glEnableVertexAttribArray(vertexColorAttribute);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_c);
+        glVertexAttribPointer(vertexColorAttribute, 3, GL_FLOAT, false, 0, 0);
+        
+        // ----------------------- TEXTURE COORDS ----------------------------//
+        FloatBuffer textCoordsBuffer = BufferUtils.createFloatBuffer(textCoords.length);
+        textCoordsBuffer.put(textCoords).flip();
+        
+        int vbo_t = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_t);
+        glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+    
+        int texcoordAttribute = shaderProgram.getAttributeLocation("texcoord");
+        glEnableVertexAttribArray(texcoordAttribute);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_t);
+        glVertexAttribPointer(texcoordAttribute, 2, GL_FLOAT, false, 0, 0);
+       
+        // ----------------------- TEXTURE IMAGE -----------------------------//
+        Texture texture =  Texture.loadTexture("grass.png");
+        int uniTex = shaderProgram.getUniformLocation("texImage");
+        shaderProgram.setUniform(uniTex, 0);
+        
+        uniModel = shaderProgram.getUniformLocation("model");
+    }
+    //no le podemos pasar nada xq es de tipo abstracto. por eso se declara al principio.
+@Override
     public void draw(){
         System.out.println("Dibujando avión... ");
         System.out.println("Posición avión " + get_x() + " " + get_y() + " " + get_z()); 
- 
-        glBindBuffer(GL_ARRAY_BUFFER, (int)get_vbo_v());//activamelo 
-        glVertexAttribPointer((int)get_posAttrib(), 3, GL_FLOAT, false, 0, 0);//conectalo con el buffer activo!!!!!!!
-        
-        glBindBuffer(GL_ARRAY_BUFFER,(int)get_vbo_c());
-        glVertexAttribPointer((int)get_vertex(), 3, GL_FLOAT, false, 0, 0);
-        
-        //count = get_x(); //COMPROBAR Q HAY DOS AVIONES POR EL MOMENTO FLAG!!!
-        count += 0.01f;
-        
-        if (get_num_vuelo() == 0001) {
-            float posX = (float)Math.sin(count)/2;
-            float posY = (float)Math.cos(count)/2;
-            Matrix4f model = Matrix4f.translate(posX, posY, 0);
-            glUniformMatrix4(get_model(), false, model.getBuffer());
-            glDrawArrays(GL_TRIANGLES, 0, 3);//de 3 vertices empezando desde el 0.
-        }
-        
-        if (get_num_vuelo() == 0002) {
-            float posX = (float)Math.sin(count);
-            float posY = (float)Math.cos(count);
-            Matrix4f model = Matrix4f.translate(posX, posY, 0);
-            glUniformMatrix4(get_model(), false, model.getBuffer());
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-        }
+        angle += angularVelocity*openGLHelper.getDeltaTime();
+       
+        Matrix4f model = Matrix4f.rotate(angle, 0.5f, 1f, 0); 
+        model = Matrix4f.scale(3.0f, 3.0f, 3.0f).multiply(model);
+        model = Matrix4f.translate(4, 5, 0).multiply(model);
+        glUniformMatrix4(uniModel, false, model.getBuffer());
+        glDrawArrays(GL_QUADS, 0, 4*6);        
     }
 }

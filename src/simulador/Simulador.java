@@ -1,5 +1,11 @@
 package simulador;
 
+import Utils.Drawable;
+import Utils.FPCameraController;
+import Utils.Matrix4f;
+import Utils.OpenGLHelper;
+import Utils.Shader;
+import Utils.ShaderProgram;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
@@ -14,131 +20,36 @@ import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.ArrayList;
+import java.nio.ByteBuffer;
+import org.lwjgl.Sys;
+import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
+import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWvidmode;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
+import org.lwjgl.opengl.GLContext;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Simulador extends Dibujable {
     private final ArrayList<Dibujable> objDibujables = new ArrayList<>();
-    private GLFWErrorCallback errorCallback;
-    private GLFWKeyCallback keyCallback;
-    // The window handle
-    private long window;
+    private final OpenGLHelper openGLHelper = new OpenGLHelper("Aeropuerto");
+
     Aeropuerto aero = new Aeropuerto();//Para que el aeropuerto se pueda dibujar.
-    private int shaderProgram;
-    public void run() {
-        try {
-            come_alive();//crear y dibujar.
-            glfwDestroyWindow(window);
-            keyCallback.release();
-        } finally {
-            glfwTerminate();
-            errorCallback.release();
-        }
-    }
 
-    public void initGL() {
-        glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
-        
-        if (glfwInit() != GL_TRUE) {
-            throw new IllegalStateException("Unable to initialize GLFW");
-        }
-        
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
-        int WIDTH = 700;
-        int HEIGHT = 600;
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Aeropuerto", NULL, NULL);
-        if (window == NULL) {
-            throw new RuntimeException("Failed to create the GLFW window");
-        }
-
-        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
-            @Override
-            public void invoke(long window, int key, int scancode, int action, int mods) {
-                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                    glfwSetWindowShouldClose(window, GL_TRUE); // We will detect this in our rendering loop
-                }
-            }
-        });
-
-        ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-        glfwSetWindowPos(
-                window,
-                (GLFWvidmode.width(vidmode) - WIDTH) / 2,
-                (GLFWvidmode.height(vidmode) - HEIGHT) / 2
-        );
-
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
-
-        glfwShowWindow(window);    
-        
-        //Limpiamos.
-        GLContext.createFromCurrent();
-        glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
-        
-        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, VertexShaderSrc);
-        glCompileShader(vertexShader);
-        int status = glGetShaderi(vertexShader, GL_COMPILE_STATUS);
-        if (status != GL_TRUE) {
-            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
-        }
-        //SHADERSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, FragmentShaderSrc);
-        glCompileShader(fragmentShader);
-        status = glGetShaderi(fragmentShader, GL_COMPILE_STATUS);
-        if (status != GL_TRUE) {
-            throw new RuntimeException(glGetShaderInfoLog(vertexShader));
-        }
-        //LOS JUNTAMOS:
-        shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glBindFragDataLocation(shaderProgram, 0, "fragColor");
-        glLinkProgram(shaderProgram);
-        glUseProgram(shaderProgram);     
-    } 
-    
-   static final String VertexShaderSrc = 
-                        "#version 130\n" +
-                        "\n" +
-                        "   in vec3 aVertexPosition;\n" +
-                        "   in vec3 aVertexColor;\n" +
-                        "\n" +
-                        "   out vec3 vColor;\n" +
-                        "\n" +
-                        "   uniform mat4 model;\n" +
-                        "\n" +
-                        "   void main() {\n" +
-                        "       vColor = aVertexColor;\n" +
-                        "       mat4 mvp = model;\n" +
-                        "       gl_Position = mvp * vec4(aVertexPosition, 1.0);\n" +
-                        "   }";
-    
-    static final String FragmentShaderSrc = 
-                        "#version 130\n" +
-                        "\n" +
-                        "   in vec3 vColor;\n" +
-                        "\n" +
-                        "   void main() {\n" +
-                        "        gl_FragColor = vec4(vColor, 1.0);\n" +
-                        "   }";
-     
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {
-        Pista pista = new Pista (pos_x,pos_y,pos_z,1, shaderProgram);
+        Pista pista = new Pista (pos_x,pos_y,pos_z,1, openGLHelper.getShaderProgram().get_id());
         System.out.println("Pista añadida"); 
         objDibujables.add(pista);
     }
      
     public void creador_avion(float pos_x, float pos_y, float pos_z, float ide_vuelo) {
-        Avion avion = new Avion(pos_x,pos_y,pos_z,2,ide_vuelo, shaderProgram);
+        Avion avion = new Avion(pos_x,pos_y,pos_z,2,ide_vuelo, openGLHelper.getShaderProgram().get_id());
         System.out.println("Avión añadido");
+        avion.prepareBuffers(openGLHelper);
         objDibujables.add(avion);
     }
     
@@ -174,33 +85,16 @@ public class Simulador extends Dibujable {
         }
     }
     
-    private void come_alive() 
+    public void come_alive() 
     {
-        //Creamos los objetos en las posiciones deseadas:
+        openGLHelper.initGL("VS_Texture.vs", "FS_Texture.fs");
+        //Creamos los objetos y preparamos buffer en las posiciones deseadas:
         creador_pista(3,2,2);
         creador_avion(0.5f,0.5f,0.5f,0001);
         creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
+        //Llamamos a run-loop-draw
+        openGLHelper.run((Drawable)objDibujables.get(2));
         
-        while(true) {
-            //mientras no cierres la ventana.           
-            while (glfwWindowShouldClose(window) == GL_FALSE) {
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra el lienzo, clear the framebuffer.      
-                //dibujamos todo:
-                this.draw();
-                //Imprimimos aviones y posiciones:
-                System.out.println("En el Aeropuerto hay: " + pull_type(2).size());
-                for (int i = 0; i < pull_type(2).size(); i++)
-                {
-                    System.out.println("Avion "+ i + " (" + 
-                    pull_type(2).get(i).get_x() + "," +
-                    pull_type(2).get(i).get_y() + "," +
-                    pull_type(2).get(i).get_z() + ")");  
-                }                                  
-                glfwSwapBuffers(window);
-                
-                glfwPollEvents();               
-            }
-        }
     }
 }

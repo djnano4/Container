@@ -15,20 +15,24 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  *
  * @author Heiko Brumme
  */
+
 public class ShaderProgram {
 
     /**
      * Stores the handle of the program.
      */
     private final int id;
-
     /**
      * Creates a shader program.
      */
     public ShaderProgram() {
         id = glCreateProgram();
     }
-
+    
+    public int get_id()
+    {
+        return id;
+    }
     /**
      * Attach a shader to this program.
      *
