@@ -35,14 +35,18 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Simulador extends Dibujable {
     private final ArrayList<Dibujable> objDibujables = new ArrayList<>();
-    private final OpenGLHelper openGLHelper = new OpenGLHelper("Aeropuerto");
-
+    private final OpenGLHelper openGLHelper = new OpenGLHelper("Aeropuerto", new FPCameraController(-5, -5, -15));
+    private int uKdAttribute;
+    private int uKaAttribute;
+    private ShaderProgram shaderProgram;
+    
     Aeropuerto aero = new Aeropuerto();//Para que el aeropuerto se pueda dibujar.
 
     public void creador_pista (float pos_x, float pos_y, float pos_z)
     {
         Pista pista = new Pista (pos_x,pos_y,pos_z,1, openGLHelper.getShaderProgram().get_id());
-        System.out.println("Pista añadida"); 
+        System.out.println("Pista añadida");
+        pista.prepareBuffers(openGLHelper);
         objDibujables.add(pista);
     }
      
@@ -50,6 +54,7 @@ public class Simulador extends Dibujable {
         Avion avion = new Avion(pos_x,pos_y,pos_z,2,ide_vuelo, openGLHelper.getShaderProgram().get_id());
         System.out.println("Avión añadido");
         avion.prepareBuffers(openGLHelper);
+        avion.initLights();
         objDibujables.add(avion);
     }
     
@@ -78,23 +83,24 @@ public class Simulador extends Dibujable {
     
     @Override
     public void draw(){
-    //Dibujamos cada uno de los objetos creados:
-        aero.drawBackground();
-        for (Dibujable objDibujable : objDibujables) {
-            objDibujable.draw();
-        }
+    }
+    
+     public void draw_all(){
+    //Dibujamos cada uno de los objetos creados.        
+        //Llamamos a run-loop-draw
+        for (int i = 0; i < objDibujables.size(); i++){
+            openGLHelper.run(objDibujables);
+        }    
     }
     
     public void come_alive() 
     {
-        openGLHelper.initGL("VS_Texture.vs", "FS_Texture.fs");
+        openGLHelper.initGL("VS_ADS_Texture.vs", "FS_ADS_Texture4.fs");
         //Creamos los objetos y preparamos buffer en las posiciones deseadas:
         creador_pista(3,2,2);
         creador_avion(0.5f,0.5f,0.5f,0001);
         creador_avion(0.3f,0.3f,0.3f,0002);
         creador_torre(0.1f,0.1f,0.1f);
-        //Llamamos a run-loop-draw
-        openGLHelper.run((Drawable)objDibujables.get(2));
-        
+        draw_all();
     }
 }
