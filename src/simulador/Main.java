@@ -5,5 +5,6 @@ public class Main {
     {
         Simulador simula = new Simulador();
         simula.come_alive();
+        
     }    
 }
