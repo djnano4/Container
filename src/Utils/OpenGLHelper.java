@@ -6,6 +6,7 @@
 package Utils;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import org.lwjgl.Sys;
 import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
 import static org.lwjgl.glfw.GLFW.*;
@@ -17,12 +18,13 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import org.lwjgl.opengl.GLContext;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import simulador.Dibujable;
 
 /**
  *
  * @author Agustin
  */
-public class OpenGLHelper {
+public class OpenGLHelper{
     private Shader vertexShader;
     private Shader fragmentShader;
     private ShaderProgram shaderProgram;
@@ -62,11 +64,11 @@ public class OpenGLHelper {
         this.camera = camera;
     }
     
-    public void run(Drawable drawable) {
+    public void run(ArrayList<Dibujable> objDibujables) {
         System.out.println("Hello LWJGL " + Sys.getVersion() + "!. " + tutorialName);
 
         try {
-            loop(drawable);
+            loop(objDibujables);
 
             // Release window and window callbacks
             glfwDestroyWindow(window);
@@ -249,7 +251,7 @@ public class OpenGLHelper {
         return camera.lookThrough();
     }
     
-    private void loop(Drawable drawable)
+    private void loop(ArrayList<Dibujable> objDibujables)
     {
         // Set the clear color
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -272,8 +274,12 @@ public class OpenGLHelper {
             Matrix4f view = camera.lookThrough();
             glUniformMatrix4(uniView, false, view.getBuffer());
 
+            
+            for (Dibujable objDibujable : objDibujables) {
+            objDibujable.draw();
+            }
             /* Render */
-            drawable.draw();
+            //objDibujables.draw();
 
             /* Swap buffers and poll Events */
             glfwSwapBuffers(window); // swap the color buffers  
