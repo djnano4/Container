@@ -1,5 +1,6 @@
 package simulador;
 
+import Utils.Drawable;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
